@@ -20,6 +20,7 @@ def setup():
 def draw():
     global imagen, shaders, idxShader, pg
     
+    background(0)
     pGraphics_draw()
     setShaderParameters()
     shader(shade)
@@ -40,7 +41,8 @@ def setShaderParameters():
     
     if idxShader == 0:
         blur_size = floor(three_rule(100.0, mouseY, float(height)))
-        shade.set("sigma", map(mouseX, 0, width, 0, 100.0))
+        sigma = three_rule(100, mouseX, float(width))
+        shade.set("sigma", sigma)
         shade.set("blurSize", int(blur_size))
     
     elif idxShader == 1:
