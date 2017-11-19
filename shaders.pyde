@@ -1,4 +1,4 @@
-shaders = ["blur.glsl", "hue.glsl", "pixelate.glsl"]
+shaders = ["blur.glsl", "pixelate.glsl", "hue.glsl"]
 idxShader = 0
 pg = None
 shade = None
@@ -6,11 +6,10 @@ imagen = None
 imagen2 = None
 
 def setup():
-    global pg, imagen, imagen2, shaders, idxShader
+    global pg, imagen, imagen2, shaders, idxShader, shade
     
-    size(800, 640, P3D)
+    size(800, 640, P2D)
     textSize(22)
-    fill(0)
     idxShader = 0
     pg = createGraphics(800, 640)
     imagen = loadImage("cyt.jpg")
@@ -21,19 +20,13 @@ def setup():
 def draw():
     global imagen, shaders, idxShader, pg
     
+    pGraphics_draw()
     setShaderParameters()
-    
-    #shader(shade);
+    shader(shade)
     image(imagen, 0, 0, width, height)
-    text(shaders[idxShader], 5, 20)
-    pg.beginDraw()
-    #setShaderParameters()
-    pg.clear()
-    pg.noFill()
-    pg.rectMode(CENTER)
-    pg.rect(mouseX, mouseY, 80, 80)
-    pg.endDraw()
+    resetShader()
     image(pg, 0, 0)
+    text(shaders[idxShader], 5, 20)
 
 
 def setupShader():
@@ -46,25 +39,37 @@ def setShaderParameters():
     global idxShader, shade
     
     if idxShader == 0:
-        shade.set("hue", map(mouseX, 0, width, 0, TWO_PI))
+        blur_size = floor(three_rule(100.0, mouseY, float(height)))
+        shade.set("sigma", map(mouseX, 0, width, 0, 100.0))
+        shade.set("blurSize", int(blur_size))
     
     elif idxShader == 1:
         shade.set("pixels", 0.1 * mouseX, 0.1 * mouseY)
     
     elif idxShader == 2:
-        shade.set("sigma", map(mouseX, 0, width, 0, 10.0))
-        shade.set("blurSize", map(mouseY, 0, height, 0, 30.0))
+        shade.set("hue", map(mouseX, 0, width, 0, TWO_PI))
+
+
+def pGraphics_draw():
+    pg.beginDraw()
+    pg.clear()
+    pg.strokeWeight(2)
+    pg.stroke(255, 100, 0)
+    pg.noFill()
+    pg.rectMode(CENTER)
+    pg.rect(mouseX, mouseY, 80, 80)
+    pg.endDraw()
+
+
+def three_rule(total, var_value, max_value):
+    result = total*(var_value/max_value)
     
-    print("Puntos: ", map(mouseX, 0, width, 0, TWO_PI))
+    return result
 
 
 def keyPressed():
     global idxShader, shaders, pg
     
     if key == 'n':
-        idxShader = (idxShader + 1) % len(shaders)
+        #idxShader = (idxShader + 1) % len(shaders)
         setupShader()
-    
-    else:
-        fill(0)
-        pg.ellipse(mouseX, mouseY, 100, 100)
