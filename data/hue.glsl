@@ -16,30 +16,51 @@ const vec4  kYIQToB   = vec4 (1.0, -1.107, 1.704, 0.0);
 varying vec4 vertTexCoord;
 uniform sampler2D texture;
 uniform float hue;
+uniform float pixelX;
+uniform float xLength;
+uniform float pixelY;
+uniform float yLength;
 
-void main ()
-{
-    // Sample the input pixel
-	vec4 color = texture2D(texture, vertTexCoord.st).rgba;
 
-    // Convert to YIQ
-    float   YPrime  = dot (color, kRGBToYPrime);
-    float   I      = dot (color, kRGBToI);
-    float   Q      = dot (color, kRGBToQ);
+bool isInBounds(float pixelComp, float compValue, float length){
+	bool result = (pixelComp >= (compValue - length)) && (pixelComp <= (compValue + length));
+	
+	return result;
+}
 
-    // Calculate the chroma
-    float   chroma  = sqrt (I * I + Q * Q);
 
-    // Convert desired hue back to YIQ
-    Q = chroma * sin (hue);
-    I = chroma * cos (hue);
+void main (){
+  	vec2 p = vertTexCoord.st;
+	
+	bool isXInBounds = isInBounds(gl_FragCoord.x, pixelX, xLength);
+	bool isYInBounds = isInBounds(gl_FragCoord.y, pixelY, yLength);
 
-    // Convert back to RGB
-    vec4    yIQ   = vec4 (YPrime, I, Q, 0.0);
-    color.r = dot (yIQ, kYIQToR);
-    color.g = dot (yIQ, kYIQToG);
-    color.b = dot (yIQ, kYIQToB);
+	if (isXInBounds && isYInBounds){
+		// Sample the input pixel
+		vec4 color = texture2D(texture, vertTexCoord.st).rgba;
 
-    // Save the result
-    gl_FragColor    = color;
+		// Convert to YIQ
+		float YPrime = dot (color, kRGBToYPrime);
+		float I = dot (color, kRGBToI);
+		float Q = dot (color, kRGBToQ);
+
+		// Calculate the chroma
+		float chroma = sqrt (I * I + Q * Q);
+
+		// Convert desired hue back to YIQ
+		Q = chroma * sin (hue);
+		I = chroma * cos (hue);
+
+		// Convert back to RGB
+		vec4 yIQ = vec4 (YPrime, I, Q, 0.0);
+		color.r = dot (yIQ, kYIQToR);
+		color.g = dot (yIQ, kYIQToG);
+		color.b = dot (yIQ, kYIQToB);
+
+		// Save the result
+		gl_FragColor = color;
+	}
+	
+	else
+		gl_FragColor = texture2D(texture, p);
 }

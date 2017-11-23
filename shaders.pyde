@@ -1,21 +1,19 @@
-shaders = ["blur.glsl", "pixelate.glsl"] #, "hue.glsl"]
+shaders = ["blur.glsl", "pixelate.glsl", "hue.glsl"]
 idxShader = 0
 rect_length = 80
 rect_height = 80
 pg = None
 shade = None
 imagen = None
-imagen2 = None
 
 def setup():
-    global pg, imagen, imagen2, shaders, idxShader, shade
+    global pg, imagen, shaders, idxShader, shade
     
     size(800, 640, P2D)
     textSize(22)
     idxShader = 0
     pg = createGraphics(800, 640)
     imagen = loadImage("cyt.jpg")
-    imagen2 = loadImage("a.jpg")
     setupShader()
 
 
@@ -57,8 +55,8 @@ def setShaderParameters():
     shade.set("yLength", y_length)
     
     if idxShader == 0:
-        blur_size =  80 #floor(three_rule(100.0, mouseY, float(height)))
-        sigma = 100.0 #three_rule(100, mouseX, float(width))
+        sigma = 100.0
+        blur_size = 10
         shade.set("sigma", sigma)
         shade.set("blurSize", int(blur_size))
     
@@ -67,7 +65,8 @@ def setShaderParameters():
         shade.set("pixels", *pixels_arg)
     
     elif idxShader == 2:
-        shade.set("hue", map(mouseX, 0, width, 0, TWO_PI))
+        hue_value = PI/2
+        shade.set("hue", hue_value)
 
 
 def keyPressed():
