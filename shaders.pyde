@@ -1,4 +1,4 @@
-shaders = ["blur.glsl", "pixelate.glsl", "hue.glsl"]
+shaders = ["blur.glsl", "pixelate.glsl"] #, "hue.glsl"]
 idxShader = 0
 rect_length = 80
 rect_height = 80
@@ -63,7 +63,8 @@ def setShaderParameters():
         shade.set("blurSize", int(blur_size))
     
     elif idxShader == 1:
-        shade.set("pixels", 0.1 * mouseX, 0.1 * mouseY)
+        pixels_arg = [100.0, 100.0]
+        shade.set("pixels", *pixels_arg)
     
     elif idxShader == 2:
         shade.set("hue", map(mouseX, 0, width, 0, TWO_PI))
@@ -72,8 +73,8 @@ def setShaderParameters():
 def keyPressed():
     global idxShader, shaders, pg
     
-    if key == 'n':
-        #idxShader = (idxShader + 1) % len(shaders)
+    if key == ' ':
+        idxShader = (idxShader + 1) % len(shaders)
         setupShader()
 
 
