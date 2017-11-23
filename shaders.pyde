@@ -1,5 +1,7 @@
 shaders = ["blur.glsl", "pixelate.glsl", "hue.glsl"]
 idxShader = 0
+rect_length = 80
+rect_height = 80
 pg = None
 shade = None
 imagen = None
@@ -36,12 +38,27 @@ def setupShader():
     shade = loadShader(shaders[idxShader])
 
 
+def three_rule(total, var_value, max_value):
+    result = total*(var_value/max_value)
+    
+    return result
+
+
 def setShaderParameters():
-    global idxShader, shade
+    global idxShader, shade, rect_length
+    
+    mouse_x = float(mouseX)
+    mouse_y = float(height - mouseY)
+    x_length = float(rect_length/2)
+    y_length = float(rect_height/2)
+    shade.set("pixelX", mouse_x)
+    shade.set("xLength", x_length)
+    shade.set("pixelY", mouse_y)
+    shade.set("yLength", y_length)
     
     if idxShader == 0:
-        blur_size = floor(three_rule(100.0, mouseY, float(height)))
-        sigma = three_rule(100, mouseX, float(width))
+        blur_size =  80 #floor(three_rule(100.0, mouseY, float(height)))
+        sigma = 100.0 #three_rule(100, mouseX, float(width))
         shade.set("sigma", sigma)
         shade.set("blurSize", int(blur_size))
     
@@ -52,26 +69,22 @@ def setShaderParameters():
         shade.set("hue", map(mouseX, 0, width, 0, TWO_PI))
 
 
-def pGraphics_draw():
-    pg.beginDraw()
-    pg.clear()
-    pg.strokeWeight(2)
-    pg.stroke(255, 100, 0)
-    pg.noFill()
-    pg.rectMode(CENTER)
-    pg.rect(mouseX, mouseY, 80, 80)
-    pg.endDraw()
-
-
-def three_rule(total, var_value, max_value):
-    result = total*(var_value/max_value)
-    
-    return result
-
-
 def keyPressed():
     global idxShader, shaders, pg
     
     if key == 'n':
         #idxShader = (idxShader + 1) % len(shaders)
         setupShader()
+
+
+def pGraphics_draw():
+    global rect_length, rect_height
+    
+    pg.beginDraw()
+    pg.clear()
+    pg.strokeWeight(2)
+    pg.stroke(255, 100, 0)
+    pg.noFill()
+    pg.rectMode(CENTER)
+    pg.rect(mouseX, mouseY, rect_length, rect_height)
+    pg.endDraw()
